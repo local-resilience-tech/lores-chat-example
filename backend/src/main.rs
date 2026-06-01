@@ -7,6 +7,7 @@ use tokio::sync::{broadcast, Mutex};
 use crate::panda_client::PandaClient;
 use crate::static_server::frontend_handler;
 
+mod api;
 mod panda_client;
 mod realtime;
 mod static_server;
@@ -34,6 +35,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/test", get(|| async { "ok" }))
+        .route("/api/regions", get(api::list_regions))
         .route("/ws/:region_id", get(realtime::handler))
         .fallback_service(get(frontend_handler))
         .with_state(state);

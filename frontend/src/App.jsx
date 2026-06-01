@@ -1,17 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useWebSocket from "react-use-websocket";
 import "./App.css";
 import { ServerIndicator } from "./components/ServerIndicator";
 import { MessageSender } from "./components/MessageSender";
 import { MessageList } from "./components/MessageList";
+import { RegionSelector } from "./components/RegionSelector";
 
-const REGION_ID = "003f1de60ac340ba64b73d3e97bd25f694c73ab178b52f246f8a05bcafcc1676";
-const WS_URL = `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws/${REGION_ID}`;
+const WS_URL = (regionId) => `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws/${regionId}`;
 
 export function App() {
   const [messages, setMessages] = useState([]);
   const [hasError, setHasError] = useState(false);
-  const { sendMessage, readyState } = useWebSocket(WS_URL, {
+  const [regions, setRegions] = useState(null);
+  const [currentRegion, setCurrentRegion] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/regions")
+      .then((res) => res.json())
+      .then((data) => {
+        setRegions(data);
+        if (data.length === 1) {
+          setCurrentRegion(data[0]);
+        }
+      })
+      .catch((err) => console.error("failed to fetch regions:", err));
+  }, []);
+
+  const { sendMessage, readyState } = useWebSocket(currentRegion ? WS_URL(currentRegion) : null, {
     onError: () => setHasError(true),
     onOpen: () => {
       setHasError(false);
@@ -44,7 +59,7 @@ export function App() {
           <h1>Lores Chat Example</h1>
           <ServerIndicator readyState={readyState} hasError={hasError} />
         </div>
-        <MessageSender onSend={handleSend} />
+        {regions === null ? <p>loading regions...</p> : currentRegion ? <MessageSender onSend={handleSend} /> : <RegionSelector regions={regions} onSelect={setCurrentRegion} />}
       </div>
 
       <MessageList messages={messages} />
