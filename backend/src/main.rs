@@ -12,11 +12,13 @@ mod realtime;
 mod static_server;
 
 const PANDA_GRPC_ADDR: &str = "http://127.0.0.1:50051";
+const APP_NAMESPACE: &str = "chat-example:v1";
 
 #[derive(Clone)]
 pub struct AppState {
     pub panda: Arc<Mutex<PandaClient>>,
     pub channels: Arc<Mutex<HashMap<[u8; 32], broadcast::Sender<Vec<u8>>>>>,
+    pub app_namespace: String,
 }
 
 #[tokio::main]
@@ -27,6 +29,7 @@ async fn main() {
     let state = AppState {
         panda,
         channels: Arc::new(Mutex::new(HashMap::new())),
+        app_namespace: APP_NAMESPACE.to_string(),
     };
 
     let app = Router::new()

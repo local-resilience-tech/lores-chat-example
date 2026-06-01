@@ -41,7 +41,7 @@ async fn handle_socket(mut ws: WebSocket, state: AppState, region_id: [u8; 32]) 
                     _ => continue,
                 };
                 let mut client = state.panda.lock().await;
-                if let Err(e) = client.publish(region_id, payload).await {
+                if let Err(e) = client.publish(region_id, &state.app_namespace, payload).await {
                     eprintln!("Failed to publish message: {e}");
                     let error_msg = format!(
                         r#"{{"type":"error","message":{}}}"#,
@@ -77,7 +77,12 @@ async fn get_or_create_channel(
     channels.insert(region_id, tx.clone());
     // Drop the lock before spawning so the loop can acquire it if needed.
     drop(channels);
-    tokio::spawn(subscribe_loop(Arc::clone(&state.panda), tx, region_id));
+    tokio::spawn(subscribe_loop(
+        Arc::clone(&state.panda),
+        tx,
+        region_id,
+        state.app_namespace.clone(),
+    ));
     rx
 }
 
@@ -85,11 +90,12 @@ pub async fn subscribe_loop(
     panda: Arc<Mutex<PandaClient>>,
     tx: broadcast::Sender<Vec<u8>>,
     region_id: [u8; 32],
+    app_namespace: String,
 ) {
     loop {
         let stream_result = {
             let mut client = panda.lock().await;
-            client.subscribe(region_id).await
+            client.subscribe(region_id, &app_namespace).await
         };
         match stream_result {
             Ok(mut stream) => loop {

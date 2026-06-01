@@ -10,8 +10,6 @@ use proto::{
 };
 use tonic::Streaming;
 
-const APP_NAMESPACE: &str = "chat-example:v1";
-
 #[derive(Clone)]
 pub struct PandaClient {
     inner: TonicPandaClient<Channel>,
@@ -31,10 +29,11 @@ impl PandaClient {
     pub async fn subscribe(
         &mut self,
         region_id: [u8; 32],
+        app_namespace: &str,
     ) -> Result<Streaming<OperationEvent>, tonic::Status> {
         let request = SubscribeRequest {
             region_id: region_id.to_vec(),
-            app_namespace: APP_NAMESPACE.to_string(),
+            app_namespace: app_namespace.to_string(),
         };
         let response = self.inner.subscribe(request).await?;
         Ok(response.into_inner())
@@ -43,11 +42,12 @@ impl PandaClient {
     pub async fn publish(
         &mut self,
         region_id: [u8; 32],
+        app_namespace: &str,
         payload: Vec<u8>,
     ) -> Result<(), tonic::Status> {
         let request = PublishRequest {
             region_id: region_id.to_vec(),
-            app_namespace: APP_NAMESPACE.to_string(),
+            app_namespace: app_namespace.to_string(),
             payload,
         };
         self.inner.publish(request).await?;
