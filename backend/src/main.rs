@@ -1,11 +1,20 @@
 use axum::{routing::get, Router};
 use std::net::SocketAddr;
 
+use crate::static_server::frontend_handler;
+
+mod static_server;
+
+#[macro_use]
+extern crate lazy_static;
+
 #[tokio::main]
 async fn main() {
-    let app = Router::new().route("/", get(|| async { "ok" }));
+    let app = Router::new()
+        .route("/test", get(|| async { "ok" }))
+        .fallback_service(get(frontend_handler));
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     println!("backend listening on http://{addr}");
 
     let listener = tokio::net::TcpListener::bind(addr)
