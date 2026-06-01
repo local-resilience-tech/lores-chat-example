@@ -17,10 +17,13 @@ export function App() {
         const data = JSON.parse(event.data);
         if (data.type === "error") {
           setHasError(true);
+          return;
         }
       } catch {
-        // non-JSON messages are fine
+        // non-JSON messages fall through
       }
+      console.log("[subscribe] received message from server:", event.data);
+      setMessages((prev) => [...prev, { text: event.data, from: "server" }]);
     },
   });
 
@@ -28,8 +31,8 @@ export function App() {
     e.preventDefault();
     if (!input.trim()) return;
     setHasError(false);
+    console.log("[publish] sending message to backend:", input);
     sendMessage(input);
-    setMessages((prev) => [...prev, input]);
     setInput("");
   }
 
@@ -48,7 +51,9 @@ export function App() {
 
       <ul className="message-list">
         {messages.map((msg, i) => (
-          <li key={i}>{msg}</li>
+          <li key={i} className={msg.from === "me" ? "message-me" : "message-server"}>
+            {msg.text}
+          </li>
         ))}
       </ul>
     </div>

@@ -5,7 +5,10 @@ pub mod proto {
 }
 
 use hex_literal::hex;
-use proto::{panda_client::PandaClient as TonicPandaClient, PublishRequest};
+use proto::{
+    panda_client::PandaClient as TonicPandaClient, OperationEvent, PublishRequest, SubscribeRequest,
+};
+use tonic::Streaming;
 
 // Hardcoded dummy region_id and app_namespace for now.
 const DUMMY_REGION_ID: [u8; 32] =
@@ -26,6 +29,15 @@ impl PandaClient {
         Ok(Self {
             inner: TonicPandaClient::new(channel),
         })
+    }
+
+    pub async fn subscribe(&mut self) -> Result<Streaming<OperationEvent>, tonic::Status> {
+        let request = SubscribeRequest {
+            region_id: DUMMY_REGION_ID.to_vec(),
+            app_namespace: DUMMY_APP_NAMESPACE.to_string(),
+        };
+        let response = self.inner.subscribe(request).await?;
+        Ok(response.into_inner())
     }
 
     pub async fn publish(&mut self, payload: Vec<u8>) -> Result<(), tonic::Status> {
