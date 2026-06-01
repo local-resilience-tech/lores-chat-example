@@ -2,12 +2,13 @@ import { useState } from "react";
 import useWebSocket from "react-use-websocket";
 import "./App.css";
 import { ServerIndicator } from "./components/ServerIndicator";
+import { MessageSender } from "./components/MessageSender";
+import { MessageList } from "./components/MessageList";
 
 const WS_URL = `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws`;
 
 export function App() {
   const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
   const [hasError, setHasError] = useState(false);
   const { sendMessage, readyState } = useWebSocket(WS_URL, {
     onError: () => setHasError(true),
@@ -27,13 +28,10 @@ export function App() {
     },
   });
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (!input.trim()) return;
+  function handleSend(text) {
     setHasError(false);
-    console.log("[publish] sending message to backend:", input);
-    sendMessage(input);
-    setInput("");
+    console.log("[publish] sending message to backend:", text);
+    sendMessage(text);
   }
 
   return (
@@ -43,19 +41,10 @@ export function App() {
           <h1>Lores Chat Example</h1>
           <ServerIndicator readyState={readyState} hasError={hasError} />
         </div>
-        <form onSubmit={handleSubmit} className="message-form">
-          <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type a message..." />
-          <button type="submit">Send</button>
-        </form>
+        <MessageSender onSend={handleSend} />
       </div>
 
-      <ul className="message-list">
-        {messages.map((msg, i) => (
-          <li key={i} className={msg.from === "me" ? "message-me" : "message-server"}>
-            {msg.text}
-          </li>
-        ))}
-      </ul>
+      <MessageList messages={messages} />
     </div>
   );
 }
