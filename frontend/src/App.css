@@ -1,0 +1,109 @@
+:root {
+  --blue0: #edf8fd;
+  --blue1: #b8dff3;
+  --blue2: #89c2e5;
+  --blue3: #5ea3d1;
+  --blue4: #3f80b2;
+  --blue5: #365c7d;
+  --blue6: #244f6f;
+  --blue7: #16415d;
+  --blue8: #0b3248;
+  --blue9: #04212f;
+
+  --orange0: #fff4e1;
+  --orange1: #ffe8cc;
+  --orange2: #fed09b;
+  --orange3: #fdb766;
+  --orange4: #fca13a;
+  --orange5: #fc931d;
+  --orange6: #e17800;
+  --orange7: #e17800;
+  --orange8: #c86a00;
+  --orange9: #af5a00;
+
+  --burnt-orange0: #fdf0ed;
+  --burnt-orange1: #f6bfb2;
+  --burnt-orange2: #ee8e77;
+  --burnt-orange3: #e65e3c;
+  --burnt-orange4: #c63c1a;
+  --burnt-orange5: #8b2b13;
+  --burnt-orange6: #6e2114;
+  --burnt-orange7: #521812;
+  --burnt-orange8: #36100c;
+  --burnt-orange9: #1e0400;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  margin: 0;
+  padding: 0;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  wudth: 100vw;
+}
+
+.message-form {
+  display: flex;
+  gap: 8px;
+  padding: 20px 16px;;
+  background-color: var(--orange1);
+  background: linear-gradient(to bottom, var(--orange3), var(--orange5));
+
+}
+
+.message-form input[type="text"] {
+  padding: 8px;
+  border: 2px solid var(--burnt-orange7);
+  border-radius: 4px;
+  background-color: var(--orange8);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.message-form input[type="text"]:focus {
+  outline: none;
+  border-color: var(--burnt-orange6);
+  box-shadow: 0 0 0 2px var(--burnt-orange4);
+}
+
+.message-form button {
+  padding: 8px 16px;
+  background-color: var(--burnt-orange7);
+  border: 2px solid var(--burnt-orange7);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.message-form button:hover {
+  background-color: var(--burnt-orange6);
+}
+
+.message-form input {
+  flex: 1;
+}
+
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  margin: 0;
+  padding: 12px;
+  list-style: none;
+}
+
+.on-light-blue {
+  color: #eee;
+  background: linear-gradient(to bottom, var(--blue6) 0%, var(--blue5) 100px, var(--blue5) 100%);
+}
