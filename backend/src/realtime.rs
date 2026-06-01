@@ -32,6 +32,8 @@ async fn handle_socket(mut ws: WebSocket, panda: Arc<Mutex<PandaClient>>) {
         let mut client = panda.lock().await;
         if let Err(e) = client.publish(payload).await {
             eprintln!("Failed to publish message: {e}");
+            let error_msg = format!(r#"{{"type":"error","message":{}}}"#, serde_json::json!(e.to_string()));
+            let _ = ws.send(Message::Text(error_msg.into())).await;
         }
     }
 }

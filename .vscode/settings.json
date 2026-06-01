@@ -1,0 +1,8 @@
+{
+  "files.autoSave": "onFocusChange",
+  "editor.defaultFormatter": null,
+  "editor.formatOnSave": true,
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

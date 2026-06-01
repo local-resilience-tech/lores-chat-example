@@ -17,9 +17,7 @@ const PANDA_GRPC_ADDR: &str = "http://127.0.0.1:50051";
 
 #[tokio::main]
 async fn main() {
-    let panda = PandaClient::connect(PANDA_GRPC_ADDR.to_string())
-        .await
-        .expect("failed to connect to lores-p2panda-server gRPC");
+    let panda = PandaClient::new(PANDA_GRPC_ADDR).expect("invalid gRPC address");
     let panda = Arc::new(Mutex::new(panda));
 
     let app = Router::new()

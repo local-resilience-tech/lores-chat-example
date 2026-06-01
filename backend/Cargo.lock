@@ -577,6 +577,7 @@ dependencies = [
  "futures-util",
  "lazy_static",
  "prost",
+ "serde_json",
  "tokio",
  "tonic",
  "tonic-build",

@@ -1,4 +1,4 @@
-use tonic::transport::Channel;
+use tonic::transport::{Channel, Endpoint};
 
 pub mod proto {
     tonic::include_proto!("lores.panda.v1");
@@ -16,9 +16,14 @@ pub struct PandaClient {
 }
 
 impl PandaClient {
-    pub async fn connect(addr: String) -> Result<Self, tonic::transport::Error> {
-        let inner = TonicPandaClient::connect(addr).await?;
-        Ok(Self { inner })
+    /// Creates a client with a lazy channel — no connection is made until the
+    /// first RPC call, so the backend starts cleanly even if the gRPC server
+    /// is not yet available.
+    pub fn new(addr: &str) -> Result<Self, tonic::transport::Error> {
+        let channel = Endpoint::from_shared(addr.to_string())?.connect_lazy();
+        Ok(Self {
+            inner: TonicPandaClient::new(channel),
+        })
     }
 
     pub async fn publish(&mut self, payload: Vec<u8>) -> Result<(), tonic::Status> {

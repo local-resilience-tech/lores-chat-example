@@ -36,6 +36,7 @@
 body {
   margin: 0;
   padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 #root {
@@ -47,16 +48,34 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  wudth: 100vw;
+  width: 100vw;
+}
+
+h1 {
+  margin: 0;
+  color: var(--burnt-orange9);
+}
+
+.header {
+  padding: 20px 16px;
+  background-color: var(--orange1);
+  background: linear-gradient(to bottom, var(--orange3), var(--orange5));
+  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 2px solid var(--burnt-orange7);
+}
+
+.title {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .message-form {
   display: flex;
   gap: 8px;
-  padding: 20px 16px;;
-  background-color: var(--orange1);
-  background: linear-gradient(to bottom, var(--orange3), var(--orange5));
-
 }
 
 .message-form input[type="text"] {
@@ -106,4 +125,11 @@ body {
 .on-light-blue {
   color: #eee;
   background: linear-gradient(to bottom, var(--blue6) 0%, var(--blue5) 100px, var(--blue5) 100%);
+}
+
+.server-indicator {
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: default;
+  user-select: none;
 }
