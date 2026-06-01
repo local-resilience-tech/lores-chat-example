@@ -2,8 +2,9 @@ use std::env;
 
 use axum::{
     body::Body,
-    http::{HeaderValue, Request, Response, StatusCode, Uri, header::ETAG},
+    http::{header::ETAG, HeaderValue, Request, Response, StatusCode, Uri},
 };
+use lazy_static::lazy_static;
 use tower::ServiceExt;
 use tower_http::services::{ServeDir, ServeFile};
 

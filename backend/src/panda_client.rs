@@ -4,16 +4,13 @@ pub mod proto {
     tonic::include_proto!("lores.panda.v1");
 }
 
-use hex_literal::hex;
 use proto::{
-    panda_client::PandaClient as TonicPandaClient, OperationEvent, PublishRequest, SubscribeRequest,
+    panda_client::PandaClient as TonicPandaClient, ListRegionsRequest, OperationEvent,
+    PublishRequest, SubscribeRequest,
 };
 use tonic::Streaming;
 
-// Hardcoded dummy region_id and app_namespace for now.
-const DUMMY_REGION_ID: [u8; 32] =
-    hex!("003f1de60ac340ba64b73d3e97bd25f694c73ab178b52f246f8a05bcafcc1676");
-const DUMMY_APP_NAMESPACE: &str = "chat-example:v1";
+const APP_NAMESPACE: &str = "chat-example:v1";
 
 #[derive(Clone)]
 pub struct PandaClient {
@@ -31,22 +28,34 @@ impl PandaClient {
         })
     }
 
-    pub async fn subscribe(&mut self) -> Result<Streaming<OperationEvent>, tonic::Status> {
+    pub async fn subscribe(
+        &mut self,
+        region_id: [u8; 32],
+    ) -> Result<Streaming<OperationEvent>, tonic::Status> {
         let request = SubscribeRequest {
-            region_id: DUMMY_REGION_ID.to_vec(),
-            app_namespace: DUMMY_APP_NAMESPACE.to_string(),
+            region_id: region_id.to_vec(),
+            app_namespace: APP_NAMESPACE.to_string(),
         };
         let response = self.inner.subscribe(request).await?;
         Ok(response.into_inner())
     }
 
-    pub async fn publish(&mut self, payload: Vec<u8>) -> Result<(), tonic::Status> {
+    pub async fn publish(
+        &mut self,
+        region_id: [u8; 32],
+        payload: Vec<u8>,
+    ) -> Result<(), tonic::Status> {
         let request = PublishRequest {
-            region_id: DUMMY_REGION_ID.to_vec(),
-            app_namespace: DUMMY_APP_NAMESPACE.to_string(),
+            region_id: region_id.to_vec(),
+            app_namespace: APP_NAMESPACE.to_string(),
             payload,
         };
         self.inner.publish(request).await?;
         Ok(())
+    }
+
+    pub async fn list_regions(&mut self) -> Result<Vec<Vec<u8>>, tonic::Status> {
+        let response = self.inner.list_regions(ListRegionsRequest {}).await?;
+        Ok(response.into_inner().region_ids)
     }
 }
