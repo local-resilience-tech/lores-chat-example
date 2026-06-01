@@ -3,6 +3,7 @@ use std::net::SocketAddr;
 
 use crate::static_server::frontend_handler;
 
+mod realtime;
 mod static_server;
 
 #[macro_use]
@@ -12,6 +13,7 @@ extern crate lazy_static;
 async fn main() {
     let app = Router::new()
         .route("/test", get(|| async { "ok" }))
+        .route("/ws", get(realtime::handler))
         .fallback_service(get(frontend_handler));
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
