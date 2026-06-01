@@ -4,10 +4,12 @@ pub mod proto {
     tonic::include_proto!("lores.panda.v1");
 }
 
+use hex_literal::hex;
 use proto::{panda_client::PandaClient as TonicPandaClient, PublishRequest};
 
-// Hardcoded dummy region_id (32 zero bytes) and app_namespace for now.
-const DUMMY_REGION_ID: [u8; 32] = [0u8; 32];
+// Hardcoded dummy region_id and app_namespace for now.
+const DUMMY_REGION_ID: [u8; 32] =
+    hex!("003f1de60ac340ba64b73d3e97bd25f694c73ab178b52f246f8a05bcafcc1676");
 const DUMMY_APP_NAMESPACE: &str = "chat-example:v1";
 
 #[derive(Clone)]
