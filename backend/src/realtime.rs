@@ -5,10 +5,11 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use futures_util::StreamExt;
+use lores_p2panda_client::PandaClient;
 use std::sync::Arc;
 use tokio::sync::{broadcast, Mutex};
 
-use crate::{panda_client::PandaClient, AppState};
+use crate::AppState;
 
 pub async fn handler(
     Path(region_id_hex): Path<String>,
@@ -98,19 +99,22 @@ pub async fn subscribe_loop(
             client.subscribe(region_id, &app_namespace).await
         };
         match stream_result {
-            Ok(mut stream) => loop {
-                match stream.message().await {
-                    Ok(Some(event)) => {
-                        // Ignore send errors — no active receivers is fine.
-                        let _ = tx.send(event.payload);
-                    }
-                    Ok(None) => break, // server closed stream, reconnect
-                    Err(e) => {
-                        eprintln!("Subscribe stream error: {e}");
-                        break;
+            Ok(response) => {
+                let mut stream = response.into_inner();
+                loop {
+                    match stream.message().await {
+                        Ok(Some(event)) => {
+                            // Ignore send errors — no active receivers is fine.
+                            let _ = tx.send(event.payload);
+                        }
+                        Ok(None) => break, // server closed stream, reconnect
+                        Err(e) => {
+                            eprintln!("Subscribe stream error: {e}");
+                            break;
+                        }
                     }
                 }
-            },
+            }
             Err(e) => {
                 eprintln!("Failed to subscribe: {e}");
             }

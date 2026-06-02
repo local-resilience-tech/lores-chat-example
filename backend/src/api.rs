@@ -7,7 +7,9 @@ pub async fn list_regions(State(state): State<AppState>) -> Result<Json<Vec<Stri
     let region_ids = panda
         .list_regions()
         .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .into_inner()
+        .region_ids;
 
     let hex_ids: Vec<String> = region_ids
         .iter()

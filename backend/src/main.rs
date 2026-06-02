@@ -1,14 +1,13 @@
 use axum::{routing::get, Router};
+use lores_p2panda_client::PandaClient;
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::{broadcast, Mutex};
 
-use crate::panda_client::PandaClient;
 use crate::static_server::frontend_handler;
 
 mod api;
-mod panda_client;
 mod realtime;
 mod static_server;
 
@@ -24,7 +23,8 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() {
-    let panda = PandaClient::new(PANDA_GRPC_ADDR).expect("invalid gRPC address");
+    let panda = PandaClient::connect_lazy(PANDA_GRPC_ADDR)
+        .expect("failed to connect to panda gRPC endpoint");
     let panda = Arc::new(Mutex::new(panda));
 
     let state = AppState {
