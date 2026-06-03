@@ -1,0 +1,25 @@
+{
+  "github": {
+    "release": true,
+    "tagName": "v${version}"
+  },
+  "npm": {
+    "publish": false
+  },
+  "plugins": {
+    "@j-ulrich/release-it-regex-bumper": {
+      "out": [
+        {
+          "file": "./frontend/package.json",
+          "search": "\"version\": \"\\d+\\.\\d+\\.\\d+\"",
+          "replace": "\"version\": \"{{version}}\""
+        },
+        {
+          "file": "./backend/Cargo.toml",
+          "search": "version = \"\\d+\\.\\d+\\.\\d+\"",
+          "replace": "version = \"{{version}}\""
+        }
+      ]
+    }
+  }
+}

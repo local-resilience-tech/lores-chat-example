@@ -4,6 +4,9 @@ setup:
 dev:
     mprocs
 
+release:
+    cd frontend && npm run release
+
 docker:
     #!/usr/bin/env bash
     set -e

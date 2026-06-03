@@ -1,4 +1,5 @@
 /target
 /backend/target
 /frontend/node_modules
+/frontend/dist
 mprocs.log
