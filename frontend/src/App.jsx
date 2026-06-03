@@ -1,14 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import useWebSocket from "react-use-websocket";
 import "./App.css";
 import { ServerIndicator } from "./components/ServerIndicator";
+import { UserIdentity } from "./components/UserIdentity";
 import { MessageSender } from "./components/MessageSender";
 import { MessageList } from "./components/MessageList";
 import { RegionSelector } from "./components/RegionSelector";
+import { generateIdentity } from "./identity";
 
 const WS_URL = (regionId) => `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws/${regionId}`;
 
 export function App() {
+  const identity = useMemo(() => generateIdentity(), []);
   const [messages, setMessages] = useState([]);
   const [hasError, setHasError] = useState(false);
   const [regions, setRegions] = useState(null);
@@ -62,7 +65,10 @@ export function App() {
       <div className="header">
         <div className="title">
           <h1>Lores Chat Example</h1>
-          <ServerIndicator readyState={readyState} hasError={hasError} />
+          <div className="title-right">
+            <UserIdentity identity={identity} />
+            <ServerIndicator readyState={readyState} hasError={hasError} />
+          </div>
         </div>
         {regions === null ? <p>loading regions...</p> : currentRegion ? <MessageSender onSend={handleSend} /> : <RegionSelector regions={regions} onSelect={setCurrentRegion} />}
       </div>

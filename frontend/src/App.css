@@ -141,3 +141,22 @@ h1 {
   cursor: default;
   user-select: none;
 }
+
+.title-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-identity {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
