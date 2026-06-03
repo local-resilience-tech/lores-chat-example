@@ -1,0 +1,13 @@
+{
+  "name": "lores-chat-example-",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "release": "release-it"
+  },
+  "devDependencies": {
+    "@j-ulrich/release-it-regex-bumper": "^5.4.0",
+    "release-it": "^20.0.1"
+  }
+}

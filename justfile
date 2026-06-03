@@ -1,11 +1,11 @@
 setup:
-    cd frontend && npm install
+    npm install && cd frontend && npm install
 
 dev:
     mprocs
 
 release:
-    cd frontend && npm run release
+    npm run release
 
 docker:
     #!/usr/bin/env bash
