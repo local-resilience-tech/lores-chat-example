@@ -1,7 +1,7 @@
 {
   "name": "lores-chat-example-",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "scripts": {
     "release": "release-it"
@@ -11,6 +11,8 @@
     "release-it": "^20.0.1"
   },
   "hooks": {
-    "after:bump": ["cd backend && cargo build"]
+    "after:bump": [
+      "cd backend && cargo build"
+    ]
   }
 }
