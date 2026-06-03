@@ -38,6 +38,11 @@ export function App() {
           setHasError(true);
           return;
         }
+        if (data.author_node !== undefined && data.text !== undefined) {
+          console.log("[subscribe] received message from server:", event.data);
+          setMessages((prev) => [...prev, { text: data.text, author_node: data.author_node, from: "server" }]);
+          return;
+        }
       } catch {
         // non-JSON messages fall through
       }

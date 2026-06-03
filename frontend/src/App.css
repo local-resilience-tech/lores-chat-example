@@ -123,6 +123,13 @@ h1 {
   list-style: none;
 }
 
+.message-author {
+  font-size: 0.75rem;
+  font-family: monospace;
+  opacity: 0.7;
+  margin-right: 8px;
+}
+
 .on-light-blue {
   color: #eee;
   background: linear-gradient(to bottom, var(--blue6) 0%, var(--blue5) 100px, var(--blue5) 100%);

@@ -105,7 +105,15 @@ pub async fn subscribe_loop(
                     match stream.message().await {
                         Ok(Some(event)) => {
                             // Ignore send errors — no active receivers is fine.
-                            let _ = tx.send(event.payload);
+                            let author_node = hex::encode(&event.author);
+                            let payload_text = String::from_utf8_lossy(&event.payload);
+                            let envelope = serde_json::json!({
+                                "author_node": author_node,
+                                "text": payload_text,
+                            })
+                            .to_string()
+                            .into_bytes();
+                            let _ = tx.send(envelope);
                         }
                         Ok(None) => break, // server closed stream, reconnect
                         Err(e) => {
