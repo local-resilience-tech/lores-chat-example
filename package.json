@@ -9,5 +9,8 @@
   "devDependencies": {
     "@j-ulrich/release-it-regex-bumper": "^5.4.0",
     "release-it": "^20.0.1"
+  },
+  "hooks": {
+    "after:bump": ["cd backend && cargo build"]
   }
 }

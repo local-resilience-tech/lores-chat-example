@@ -16,7 +16,7 @@ RUN ./platform.sh
 # setup rust compilation for the target platform
 RUN rustup component add rustfmt
 RUN rustup target add $(cat /app/.platform)
-RUN apt-get update && apt-get install -y $(cat /app/.compiler) && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y $(cat /app/.compiler) protobuf-compiler && rm -rf /var/lib/apt/lists/*
 COPY deployment/cargo-config.toml ./.cargo/config
 
 # Compile the backend
