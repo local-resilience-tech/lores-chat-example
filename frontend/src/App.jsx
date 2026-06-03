@@ -43,7 +43,18 @@ export function App() {
         }
         if (data.author_node !== undefined && data.text !== undefined) {
           console.log("[subscribe] received message from server:", event.data);
-          setMessages((prev) => [...prev, { text: data.text, author_node: data.author_node, from: "server" }]);
+          let text = data.text;
+          let senderIdentity = null;
+          try {
+            const payload = JSON.parse(data.text);
+            if (payload.text !== undefined && payload.identity !== undefined) {
+              text = payload.text;
+              senderIdentity = payload.identity;
+            }
+          } catch {
+            // plain text message, no identity
+          }
+          setMessages((prev) => [...prev, { text, identity: senderIdentity, author_node: data.author_node, from: "server" }]);
           return;
         }
       } catch {
@@ -56,8 +67,9 @@ export function App() {
 
   function handleSend(text) {
     setHasError(false);
-    console.log("[publish] sending message to backend:", text);
-    sendMessage(text);
+    const payload = JSON.stringify({ identity, text });
+    console.log("[publish] sending message to backend:", payload);
+    sendMessage(payload);
   }
 
   return (

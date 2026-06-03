@@ -26,7 +26,7 @@ export function UserIdentity({ identity }) {
   const name = `${identity.colour} ${identity.animal}`;
 
   return (
-    <span className="user-identity" title={name} aria-label={`Your identity: ${name}`} style={style}>
+    <span className="user-identity" title={name} aria-label={name} style={style}>
       {emoji} {name}
     </span>
   );
