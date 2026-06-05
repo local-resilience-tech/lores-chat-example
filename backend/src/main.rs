@@ -11,7 +11,7 @@ mod api;
 mod realtime;
 mod static_server;
 
-const PANDA_GRPC_ADDR: &str = "http://127.0.0.1:50051";
+const PANDA_GRPC_ADDR_DEFAULT: &str = "http://127.0.0.1:50051";
 const APP_NAMESPACE: &str = "chat-example:v1";
 
 #[derive(Clone)]
@@ -23,7 +23,10 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() {
-    let panda = PandaClient::connect_lazy(PANDA_GRPC_ADDR)
+    let panda_grpc_addr =
+        std::env::var("PANDA_GRPC_ADDR").unwrap_or_else(|_| PANDA_GRPC_ADDR_DEFAULT.to_string());
+
+    let panda = PandaClient::connect_lazy(panda_grpc_addr)
         .expect("failed to connect to panda gRPC endpoint");
     let panda = Arc::new(Mutex::new(panda));
 
