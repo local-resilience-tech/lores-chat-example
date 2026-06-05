@@ -11,7 +11,19 @@ import { generateIdentity } from "./identity";
 const WS_URL = (regionId) => `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws/${regionId}`;
 
 export function App() {
-  const identity = useMemo(() => generateIdentity(), []);
+  const identity = useMemo(() => {
+    const stored = localStorage.getItem("identity");
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        // corrupted, generate new
+      }
+    }
+    const newIdentity = generateIdentity();
+    localStorage.setItem("identity", JSON.stringify(newIdentity));
+    return newIdentity;
+  }, []);
   const [messages, setMessages] = useState([]);
   const [hasError, setHasError] = useState(false);
   const [regions, setRegions] = useState(null);
