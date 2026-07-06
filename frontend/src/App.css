@@ -56,6 +56,13 @@ h1 {
   color: var(--burnt-orange9);
 }
 
+.subscribe-error-banner {
+  background: var(--burnt-orange6);
+  color: white;
+  padding: 10px 16px;
+  word-break: break-word;
+}
+
 .header {
   padding: 20px 16px;
   background-color: var(--orange1);

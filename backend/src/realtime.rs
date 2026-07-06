@@ -93,6 +93,10 @@ pub async fn subscribe_loop(
         match stream_result {
             Ok(response) => {
                 let mut stream = response.into_inner();
+                let ok_msg = serde_json::json!({ "type": "subscribe_ok" })
+                    .to_string()
+                    .into_bytes();
+                let _ = tx.send(ok_msg);
                 loop {
                     match stream.message().await {
                         Ok(Some(event)) => {
@@ -117,6 +121,13 @@ pub async fn subscribe_loop(
             }
             Err(e) => {
                 eprintln!("Failed to subscribe: {e}");
+                let error_msg = serde_json::json!({
+                    "type": "subscribe_error",
+                    "message": e.to_string(),
+                })
+                .to_string()
+                .into_bytes();
+                let _ = tx.send(error_msg);
             }
         }
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;

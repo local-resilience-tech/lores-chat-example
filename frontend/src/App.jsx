@@ -5,6 +5,7 @@ import { ServerIndicator } from "./components/ServerIndicator";
 import { UserIdentity } from "./components/UserIdentity";
 import { MessageSender } from "./components/MessageSender";
 import { MessageList } from "./components/MessageList";
+import { SubscribeError } from "./components/SubscribeError";
 import { generateIdentity } from "./identity";
 
 const WS_URL = `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws`;
@@ -25,17 +26,28 @@ export function App() {
   }, []);
   const [messages, setMessages] = useState([]);
   const [hasError, setHasError] = useState(false);
+  const [subscribeError, setSubscribeError] = useState(null);
 
   const { sendMessage, readyState } = useWebSocket(WS_URL, {
     onError: () => setHasError(true),
     onOpen: () => {
       setHasError(false);
+      setSubscribeError(null);
     },
     onMessage: (event) => {
       try {
         const data = JSON.parse(event.data);
         if (data.type === "error") {
           setHasError(true);
+          return;
+        }
+        if (data.type === "subscribe_ok") {
+          setSubscribeError(null);
+          return;
+        }
+        if (data.type === "subscribe_error") {
+          const match = data.message.match(/message:\s*"([^"]+)"/);
+          setSubscribeError(match ? match[1] : data.message);
           return;
         }
         if (data.author_node !== undefined && data.text !== undefined) {
@@ -71,6 +83,7 @@ export function App() {
 
   return (
     <div className="app on-light-blue">
+      <SubscribeError message={subscribeError} />
       <div className="header">
         <div className="title">
           <h1>Lores Chat Example</h1>
