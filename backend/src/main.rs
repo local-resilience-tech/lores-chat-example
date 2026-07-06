@@ -7,18 +7,19 @@ use tokio::sync::{broadcast, Mutex};
 
 use crate::static_server::frontend_handler;
 
-mod api;
 mod realtime;
 mod static_server;
 
 const PANDA_GRPC_ADDR_DEFAULT: &str = "http://127.0.0.1:50051";
-const APP_NAMESPACE: &str = "chat-example:v1";
+const APP_ID: &str = "chat-example";
+const INSTANCE_ID: &str = "instance1";
 
 #[derive(Clone)]
 pub struct AppState {
     pub panda: Arc<Mutex<PandaClient>>,
-    pub channels: Arc<Mutex<HashMap<[u8; 32], broadcast::Sender<Vec<u8>>>>>,
-    pub app_namespace: String,
+    pub channels: Arc<Mutex<HashMap<String, broadcast::Sender<Vec<u8>>>>>,
+    pub app_id: String,
+    pub instance_id: String,
 }
 
 #[tokio::main]
@@ -33,13 +34,13 @@ async fn main() {
     let state = AppState {
         panda,
         channels: Arc::new(Mutex::new(HashMap::new())),
-        app_namespace: APP_NAMESPACE.to_string(),
+        app_id: APP_ID.to_string(),
+        instance_id: INSTANCE_ID.to_string(),
     };
 
     let app = Router::new()
         .route("/test", get(|| async { "ok" }))
-        .route("/api/regions", get(api::list_regions))
-        .route("/ws/:region_id", get(realtime::handler))
+        .route("/ws", get(realtime::handler))
         .fallback_service(get(frontend_handler))
         .with_state(state);
 
