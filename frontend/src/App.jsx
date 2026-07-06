@@ -1,14 +1,14 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import useWebSocket from "react-use-websocket";
 import "./App.css";
 import { ServerIndicator } from "./components/ServerIndicator";
 import { UserIdentity } from "./components/UserIdentity";
 import { MessageSender } from "./components/MessageSender";
 import { MessageList } from "./components/MessageList";
-import { RegionSelector } from "./components/RegionSelector";
+import { SubscribeError } from "./components/SubscribeError";
 import { generateIdentity } from "./identity";
 
-const WS_URL = (regionId) => `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws/${regionId}`;
+const WS_URL = `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws`;
 
 export function App() {
   const identity = useMemo(() => {
@@ -26,31 +26,28 @@ export function App() {
   }, []);
   const [messages, setMessages] = useState([]);
   const [hasError, setHasError] = useState(false);
-  const [regions, setRegions] = useState(null);
-  const [currentRegion, setCurrentRegion] = useState(null);
+  const [subscribeError, setSubscribeError] = useState(null);
 
-  useEffect(() => {
-    fetch("/api/regions")
-      .then((res) => res.json())
-      .then((data) => {
-        setRegions(data);
-        if (data.length === 1) {
-          setCurrentRegion(data[0]);
-        }
-      })
-      .catch((err) => console.error("failed to fetch regions:", err));
-  }, []);
-
-  const { sendMessage, readyState } = useWebSocket(currentRegion ? WS_URL(currentRegion) : null, {
+  const { sendMessage, readyState } = useWebSocket(WS_URL, {
     onError: () => setHasError(true),
     onOpen: () => {
       setHasError(false);
+      setSubscribeError(null);
     },
     onMessage: (event) => {
       try {
         const data = JSON.parse(event.data);
         if (data.type === "error") {
           setHasError(true);
+          return;
+        }
+        if (data.type === "subscribe_ok") {
+          setSubscribeError(null);
+          return;
+        }
+        if (data.type === "subscribe_error") {
+          const match = data.message.match(/message:\s*"([^"]+)"/);
+          setSubscribeError(match ? match[1] : data.message);
           return;
         }
         if (data.author_node !== undefined && data.text !== undefined) {
@@ -86,6 +83,7 @@ export function App() {
 
   return (
     <div className="app on-light-blue">
+      <SubscribeError message={subscribeError} />
       <div className="header">
         <div className="title">
           <h1>Lores Chat Example</h1>
@@ -94,7 +92,7 @@ export function App() {
             <ServerIndicator readyState={readyState} hasError={hasError} />
           </div>
         </div>
-        {regions === null ? <p>loading regions...</p> : currentRegion ? <MessageSender onSend={handleSend} /> : <RegionSelector regions={regions} onSelect={setCurrentRegion} />}
+        <MessageSender onSend={handleSend} />
       </div>
 
       <MessageList messages={messages} />

@@ -1,8 +1,7 @@
 use axum::{
     extract::ws::{Message, WebSocket},
-    extract::{Path, State, WebSocketUpgrade},
-    http::StatusCode,
-    response::{IntoResponse, Response},
+    extract::{State, WebSocketUpgrade},
+    response::Response,
 };
 use futures_util::StreamExt;
 use lores_p2panda_client::PandaClient;
@@ -11,20 +10,13 @@ use tokio::sync::{broadcast, Mutex};
 
 use crate::AppState;
 
-pub async fn handler(
-    Path(region_id_hex): Path<String>,
-    ws: WebSocketUpgrade,
-    State(state): State<AppState>,
-) -> Response {
-    let region_id = match parse_hex_32(&region_id_hex) {
-        Some(id) => id,
-        None => return (StatusCode::BAD_REQUEST, "invalid region_id").into_response(),
-    };
-    ws.on_upgrade(move |socket| handle_socket(socket, state, region_id))
+pub async fn handler(ws: WebSocketUpgrade, State(state): State<AppState>) -> Response {
+    ws.on_upgrade(move |socket| handle_socket(socket, state))
 }
 
-async fn handle_socket(mut ws: WebSocket, state: AppState, region_id: [u8; 32]) {
-    let mut rx = get_or_create_channel(&state, region_id).await;
+async fn handle_socket(mut ws: WebSocket, state: AppState) {
+    let instance_id = state.instance_id.clone();
+    let mut rx = get_or_create_channel(&state, &instance_id).await;
 
     loop {
         tokio::select! {
@@ -42,7 +34,7 @@ async fn handle_socket(mut ws: WebSocket, state: AppState, region_id: [u8; 32]) 
                     _ => continue,
                 };
                 let mut client = state.panda.lock().await;
-                if let Err(e) = client.publish(region_id, &state.app_namespace, payload).await {
+                if let Err(e) = client.publish(&state.app_id, &instance_id, payload, None).await {
                     eprintln!("Failed to publish message: {e}");
                     let error_msg = format!(
                         r#"{{"type":"error","message":{}}}"#,
@@ -68,21 +60,21 @@ async fn handle_socket(mut ws: WebSocket, state: AppState, region_id: [u8; 32]) 
 
 async fn get_or_create_channel(
     state: &AppState,
-    region_id: [u8; 32],
+    instance_id: &str,
 ) -> broadcast::Receiver<Vec<u8>> {
     let mut channels = state.channels.lock().await;
-    if let Some(tx) = channels.get(&region_id) {
+    if let Some(tx) = channels.get(instance_id) {
         return tx.subscribe();
     }
     let (tx, rx) = broadcast::channel(256);
-    channels.insert(region_id, tx.clone());
+    channels.insert(instance_id.to_string(), tx.clone());
     // Drop the lock before spawning so the loop can acquire it if needed.
     drop(channels);
     tokio::spawn(subscribe_loop(
         Arc::clone(&state.panda),
         tx,
-        region_id,
-        state.app_namespace.clone(),
+        instance_id.to_string(),
+        state.app_id.clone(),
     ));
     rx
 }
@@ -90,17 +82,21 @@ async fn get_or_create_channel(
 pub async fn subscribe_loop(
     panda: Arc<Mutex<PandaClient>>,
     tx: broadcast::Sender<Vec<u8>>,
-    region_id: [u8; 32],
-    app_namespace: String,
+    instance_id: String,
+    app_id: String,
 ) {
     loop {
         let stream_result = {
             let mut client = panda.lock().await;
-            client.subscribe(region_id, &app_namespace).await
+            client.subscribe(&app_id, &instance_id).await
         };
         match stream_result {
             Ok(response) => {
                 let mut stream = response.into_inner();
+                let ok_msg = serde_json::json!({ "type": "subscribe_ok" })
+                    .to_string()
+                    .into_bytes();
+                let _ = tx.send(ok_msg);
                 loop {
                     match stream.message().await {
                         Ok(Some(event)) => {
@@ -125,21 +121,15 @@ pub async fn subscribe_loop(
             }
             Err(e) => {
                 eprintln!("Failed to subscribe: {e}");
+                let error_msg = serde_json::json!({
+                    "type": "subscribe_error",
+                    "message": e.to_string(),
+                })
+                .to_string()
+                .into_bytes();
+                let _ = tx.send(error_msg);
             }
         }
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
     }
-}
-
-fn parse_hex_32(hex: &str) -> Option<[u8; 32]> {
-    if hex.len() != 64 {
-        return None;
-    }
-    let mut bytes = [0u8; 32];
-    for (i, chunk) in hex.as_bytes().chunks(2).enumerate() {
-        let hi = (chunk[0] as char).to_digit(16)?;
-        let lo = (chunk[1] as char).to_digit(16)?;
-        bytes[i] = (hi * 16 + lo) as u8;
-    }
-    Some(bytes)
 }

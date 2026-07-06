@@ -56,6 +56,13 @@ h1 {
   color: var(--burnt-orange9);
 }
 
+.subscribe-error-banner {
+  background: var(--burnt-orange6);
+  color: white;
+  padding: 10px 16px;
+  word-break: break-word;
+}
+
 .header {
   padding: 20px 16px;
   background-color: var(--orange1);
@@ -172,27 +179,4 @@ h1 {
   white-space: nowrap;
   cursor: default;
   user-select: none;
-}
-
-.region-selector {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: flex-start;
-}
-
-.region-selector button {
-  padding: 8px 16px;
-  background-color: var(--burnt-orange7);
-  border: 2px solid var(--burnt-orange7);
-  color: white;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  font-family: "courier new", monospace;
-}
-
-.region-selector button:hover {
-  background-color: var(--burnt-orange6);
 }
