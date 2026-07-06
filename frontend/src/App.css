@@ -173,26 +173,3 @@ h1 {
   cursor: default;
   user-select: none;
 }
-
-.region-selector {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: flex-start;
-}
-
-.region-selector button {
-  padding: 8px 16px;
-  background-color: var(--burnt-orange7);
-  border: 2px solid var(--burnt-orange7);
-  color: white;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  font-family: "courier new", monospace;
-}
-
-.region-selector button:hover {
-  background-color: var(--burnt-orange6);
-}
