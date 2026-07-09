@@ -10,9 +10,14 @@ use crate::static_server::frontend_handler;
 mod realtime;
 mod static_server;
 
+const PANDA_GRPC_ADDR_ENV: &str = "PANDA_GRPC_ADDR";
 const PANDA_GRPC_ADDR_DEFAULT: &str = "http://127.0.0.1:50051";
-const APP_ID: &str = "chat-example";
-const INSTANCE_ID: &str = "instance1";
+
+const APP_ID_ENV: &str = "LORES_APP_ID";
+const APP_ID_DEFAULT: &str = "chat-example";
+
+const INSTANCE_ID_ENV: &str = "LORES_INSTANCE_ID";
+const INSTANCE_ID_DEFAULT: &str = "default";
 
 #[derive(Clone)]
 pub struct AppState {
@@ -25,7 +30,10 @@ pub struct AppState {
 #[tokio::main]
 async fn main() {
     let panda_grpc_addr =
-        std::env::var("PANDA_GRPC_ADDR").unwrap_or_else(|_| PANDA_GRPC_ADDR_DEFAULT.to_string());
+        std::env::var(PANDA_GRPC_ADDR_ENV).unwrap_or_else(|_| PANDA_GRPC_ADDR_DEFAULT.to_string());
+    let app_id = std::env::var(APP_ID_ENV).unwrap_or_else(|_| APP_ID_DEFAULT.to_string());
+    let instance_id =
+        std::env::var(INSTANCE_ID_ENV).unwrap_or_else(|_| INSTANCE_ID_DEFAULT.to_string());
 
     let panda = PandaClient::connect_lazy(panda_grpc_addr)
         .expect("failed to connect to panda gRPC endpoint");
@@ -34,8 +42,8 @@ async fn main() {
     let state = AppState {
         panda,
         channels: Arc::new(Mutex::new(HashMap::new())),
-        app_id: APP_ID.to_string(),
-        instance_id: INSTANCE_ID.to_string(),
+        app_id,
+        instance_id,
     };
 
     let app = Router::new()
